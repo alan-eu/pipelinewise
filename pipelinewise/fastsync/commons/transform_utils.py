@@ -1,6 +1,8 @@
 from enum import unique, Enum
+import sys
 from typing import List, Dict, Optional
-
+from types import ModuleType
+from importlib import import_module
 
 @unique
 class TransformationType(Enum):
@@ -50,6 +52,24 @@ class TransformationHelper:
     A helper class for transformations in FastSync
     """
 
+    additional_transformations_path_added: dict = {}
+    @classmethod
+    def __maybe_add_additional_transformations_path(cls, path: str):
+        if path is not None:
+            if cls.additional_transformations_path_added.get(path):
+                return
+            cls.additional_transformations_path_added[path] = True
+            sys.path.insert(1, path)
+
+    additional_transformations_module_loaded: dict = {}
+    @classmethod
+    def __maybe_load_additional_transformations_module(cls, module_name: str) -> Optional[ModuleType]:
+        if module_name is not None:
+            if cls.additional_transformations_module_loaded.get(module_name):
+                return
+            cls.additional_transformations_module_loaded[module_name] = True
+            return import_module(module_name)
+
     @classmethod
     def get_trans_in_sql_flavor(
         cls, stream_name: str, transformations: List[Dict], sql_flavor: SQLFlavor
@@ -77,7 +97,7 @@ class TransformationHelper:
             if trans_item.get('tap_stream_name').lower() == stream_name.lower():
 
                 transform_type = TransformationType(trans_item['type'])
-
+                params = trans_item['params']
                 # Make the field id safe in case it's a reserved word
                 column = cls.__safe_column(trans_item['field_id'], sql_flavor)
 
@@ -86,7 +106,20 @@ class TransformationHelper:
                 # get the conditions in "when" and convert them to their SF sql equivalent
                 conditions = cls.__conditions_to_sql(transform_conditions, sql_flavor)
 
-                if transform_type == TransformationType.SET_NULL:
+                cls.__maybe_add_additional_transformations_path(trans_item.get("additional_transformations_path"))
+                additional_transformations_module: Optional[ModuleType] = cls.__maybe_load_additional_transformations_module(trans_item.get("additional_transformations_module"))
+                
+                additional_transformations_matched = False
+                if additional_transformations_module is not None:
+                    sql_string = additional_transformations_module.get_sql_from_type(transform_type, params, column, sql_flavor)
+                    if sql_string is not None:
+                        trans_map.append(
+                            {'trans': sql_string, 'conditions': conditions}
+                        )
+                        additional_transformations_matched = True
+                if additional_transformations_matched:
+                    pass
+                elif transform_type == TransformationType.SET_NULL:
                     trans_map.append(
                         {'trans': f'{column} = NULL', 'conditions': conditions}
                     )

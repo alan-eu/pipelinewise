@@ -360,7 +360,10 @@ class Config:
                             'safe_field_id': safe_column_name(trans['column']),
                             'field_paths': trans.get('field_paths'),
                             'type': trans['type'],
+                            'params': trans.get('params'),
                             'when': trans.get('when'),
+                            'additional_transformations_path': table.get('additional_transformations_path'),
+                            'additional_transformations_module': table.get('additional_transformations_module'),
                         }
                     )
 

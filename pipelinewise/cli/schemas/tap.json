@@ -148,31 +148,10 @@
         },
         "type": {
           "type": "string",
-          "enum": [
-            "SET-NULL",
-            "HASH",
-            "HASH-SKIP-FIRST-1",
-            "HASH-SKIP-FIRST-2",
-            "HASH-SKIP-FIRST-3",
-            "HASH-SKIP-FIRST-4",
-            "HASH-SKIP-FIRST-5",
-            "HASH-SKIP-FIRST-6",
-            "HASH-SKIP-FIRST-7",
-            "HASH-SKIP-FIRST-8",
-            "HASH-SKIP-FIRST-9",
-            "MASK-DATE",
-            "MASK-NUMBER",
-            "MASK-HIDDEN",
-            "MASK-STRING-SKIP-ENDS-1",
-            "MASK-STRING-SKIP-ENDS-2",
-            "MASK-STRING-SKIP-ENDS-3",
-            "MASK-STRING-SKIP-ENDS-4",
-            "MASK-STRING-SKIP-ENDS-5",
-            "MASK-STRING-SKIP-ENDS-6",
-            "MASK-STRING-SKIP-ENDS-7",
-            "MASK-STRING-SKIP-ENDS-8",
-            "MASK-STRING-SKIP-ENDS-9"
-          ]
+          "minLength": 1
+        },
+        "params": {
+          "type": "object"
         },
         "when": {
           "type": "array",
