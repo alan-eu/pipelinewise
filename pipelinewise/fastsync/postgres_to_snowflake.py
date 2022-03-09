@@ -82,6 +82,7 @@ def tap_type_to_target_type(pg_type, *_):
 def sync_table(table: str, args: Namespace) -> Union[bool, str]:
     """Sync one table"""
     postgres = FastSyncTapPostgres(args.tap, tap_type_to_target_type)
+    LOGGER.error("DB transformation_args %s", args.transform)
     snowflake = FastSyncTargetSnowflake(args.target, args.transform)
     tap_id = args.target.get('tap_id')
     archive_load_files = args.target.get('archive_load_files', False)
