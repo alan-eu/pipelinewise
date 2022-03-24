@@ -94,7 +94,7 @@ class FastSyncTargetSnowflake:
         )
 
     def query(self, query, params=None, query_tag_props=None):
-        LOGGER.debug('Running query: %s', query)
+        LOGGER.error('DB G1 Running query: %s', query)
         with self.open_connection(query_tag_props) as connection:
             with connection.cursor(snowflake.connector.DictCursor) as cur:
                 cur.execute(query, params)
@@ -379,9 +379,11 @@ class FastSyncTargetSnowflake:
         trans_map = TransformationHelper.get_trans_in_sql_flavor(
             tap_stream_name_by_table_name, transformations, SQLFlavor('snowflake')
         )
+        LOGGER.error('DB TRANS : %s', trans_map)
 
         self.__apply_transformations(trans_map, target_schema, temp_table)
 
+        LOGGER.error('DB trans DONE')
         LOGGER.info('Obfuscation rules applied.')
 
     def swap_tables(self, schema, table_name) -> None:

@@ -4,12 +4,15 @@ from typing import List, Dict, Optional
 from types import ModuleType
 from importlib import import_module
 
+import logging
+LOGGER = logging.getLogger(__name__)
+
 @unique
 class TransformationType(Enum):
     """
     List of supported transformation types
     """
-
+    NoneOrPrefixRedactedHashed = 'NoneOrPrefixRedactedHashed'
     SET_NULL = 'SET-NULL'
     MASK_HIDDEN = 'MASK-HIDDEN'
     MASK_DATE = 'MASK-DATE'
@@ -54,21 +57,29 @@ class TransformationHelper:
 
     additional_transformations_path_added: dict = {}
     @classmethod
-    def __maybe_add_additional_transformations_path(cls, path: str):
+    def __maybe_add_additional_transformations_path(cls, path: Optional[str]):
+        LOGGER.error('DB __maybe_add_additional_transformations_path: %s', path)
         if path is not None:
+            LOGGER.error('DB P1 %s', path)
             if cls.additional_transformations_path_added.get(path):
                 return
             cls.additional_transformations_path_added[path] = True
+            LOGGER.error('DB P2 INSERT: %s', path)
             sys.path.insert(1, path)
+            LOGGER.error('DB P3 INSERT: %s', sys.path)
 
     additional_transformations_module_loaded: dict = {}
     @classmethod
     def __maybe_load_additional_transformations_module(cls, module_name: str) -> Optional[ModuleType]:
+        LOGGER.error('DB __maybe_load_additional_transformations_module: %s', module_name)
         if module_name is not None:
-            if cls.additional_transformations_module_loaded.get(module_name):
-                return
-            cls.additional_transformations_module_loaded[module_name] = True
-            return import_module(module_name)
+            LOGGER.error('DB Q1')
+            if mod := cls.additional_transformations_module_loaded.get(module_name):
+                return mod
+            LOGGER.error('DB Q2 %s', module_name)
+            mod = import_module(module_name)
+            cls.additional_transformations_module_loaded[module_name] = mod
+            return mod
 
     @classmethod
     def get_trans_in_sql_flavor(
@@ -92,6 +103,7 @@ class TransformationHelper:
 
         trans_map = []
 
+        LOGGER.error('DB get_trans_in_sql_flavor: %s', transformations)
         for trans_item in transformations:
 
             if trans_item.get('tap_stream_name').lower() == stream_name.lower():
@@ -111,7 +123,10 @@ class TransformationHelper:
                 
                 additional_transformations_matched = False
                 if additional_transformations_module is not None:
-                    sql_string = additional_transformations_module.get_sql_from_type(transform_type, params, column, sql_flavor)
+                    LOGGER.error('DB S1 %s', additional_transformations_module)
+
+                    sql_string = additional_transformations_module.get_sql_from_type(LOGGER, transform_type.value, params, column, sql_flavor.value)
+                    LOGGER.error('DB S2 %s', sql_string)
                     if sql_string is not None:
                         trans_map.append(
                             {'trans': sql_string, 'conditions': conditions}

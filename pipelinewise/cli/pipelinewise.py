@@ -1793,7 +1793,7 @@ TAP RUN SUMMARY
 
         Returns: error as string
         """
-        if transformation_file:
+        if False and transformation_file:
 
             # create a temp file with the content being the given catalog object
             # we need this file to execute the validation cli command

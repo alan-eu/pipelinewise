@@ -345,6 +345,8 @@ class Config:
         """
         transformations = []
 
+        LOGGER = logging.getLogger(__name__)
+        LOGGER.error('DB generate_transformations')
         for schema in tap.get('schemas', []):
             schema_name = schema.get('source_schema')
             for table in schema.get('tables', []):

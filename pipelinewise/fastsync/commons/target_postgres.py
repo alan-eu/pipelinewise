@@ -227,6 +227,8 @@ class FastSyncTargetPostgres:
             tap_stream_name_by_table_name, transformations, SQLFlavor('postgres')
         )
 
+        # HERE we load privacy_properties and we apply trans
+
         self.__apply_transformations(trans_cols, target_schema, target_table)
 
         LOGGER.info('Obfuscation rules applied.')
@@ -288,5 +290,5 @@ class FastSyncTargetPostgres:
                 all_cols_update_sql = (
                     f'UPDATE {full_qual_table_name} SET {all_cols_update_sql};'
                 )
-
+                LOGGER.error("DB ALL COL SQL %s ", all_cols_update_sql)
                 self.query(all_cols_update_sql)
